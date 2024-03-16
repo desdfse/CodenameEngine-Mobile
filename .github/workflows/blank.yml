@@ -1,0 +1,165 @@
+Run haxelib setup ~/haxelib
+  haxelib setup ~/haxelib
+  haxelib --quiet install hmm
+  haxelib run hmm install --quiet
+  shell: /usr/bin/bash -e {0}
+  env:
+    JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.10-7/x64
+    JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.10-7/x64
+    NEKOPATH: /opt/hostedtoolcache/neko/2.3.0/x64
+    LD_LIBRARY_PATH: /opt/hostedtoolcache/neko/2.3.0/x64:$LD_LIBRARY_PATH
+    HAXE_STD_PATH: /opt/hostedtoolcache/haxe/4.2.5/x64/std
+haxelib repository is now /home/runner/haxelib
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Downloading hmm-3,1,0.zip...
+Installing hmm...
+  Current version is now 3.1.0
+Done
+Installing dependency thx.core 0.44.0
+Downloading thx,core-0,44,0.zip...
+Installing thx.core...
+  Current version is now 0.44.0
+Done
+Installing dependency utest 1.13.2
+Downloading utest-1,13,2.zip...
+Installing utest...
+  Current version is now 1.13.2
+Done
+haxelib --never newrepo --quiet
+Local repository created (/home/runner/work/CodenameEngine-Mobile/CodenameEngine-Mobile/.haxelib)
+haxelib --never git lime https://github.com/mcagabe19-stuff/lime main --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing lime from https://github.com/mcagabe19-stuff/lime branch: main
+Library lime current version is now git
+haxelib --never git hscript-improved https://www.github.com/FNF-CNE-Devs/hscript-improved custom-classes --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing hscript-improved from https://www.github.com/FNF-CNE-Devs/hscript-improved branch: custom-classes
+Library hscript-improved current version is now git
+haxelib --never install openfl 9.2.2 --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Downloading openfl-9,2,2.zip...
+Installing openfl...
+  Current version is now 9.2.2
+Done
+haxelib --never install away3d --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Downloading away3d-5,0,9.zip...
+Installing away3d...
+  Current version is now 5.0.9
+Done
+haxelib --never install format --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Downloading format-3,7,0.zip...
+Installing format...
+  Current version is now 3.7.0
+Done
+haxelib --never install markdown --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Downloading markdown-1,1,2.zip...
+Installing markdown...
+  Current version is now 1.1.2
+Done
+haxelib --never git flixel https://github.com/FNF-CNE-Devs/flixel dev --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing flixel from https://github.com/FNF-CNE-Devs/flixel branch: dev
+Library flixel current version is now git
+haxelib --never git flixel-addons https://github.com/FNF-CNE-Devs/flixel-addons dev --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing flixel-addons from https://github.com/FNF-CNE-Devs/flixel-addons branch: dev
+Library flixel-addons current version is now git
+haxelib --never git hxcpp https://github.com/mcagabe19-stuff/hxcpp master --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing hxcpp from https://github.com/mcagabe19-stuff/hxcpp branch: master
+Library hxcpp current version is now git
+haxelib --never git hxvlc https://github.com/MAJigsaw77/hxvlc main --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing hxvlc from https://github.com/MAJigsaw77/hxvlc branch: main
+Library hxvlc current version is now git
+Installing dependency hxcpp 4.3.2
+Downloading hxcpp-4,3,2.zip...
+Installing hxcpp...
+Done
+Installing dependency lime 8.1.1
+Downloading lime-8,1,1.zip...
+Installing lime...
+Done
+Installing dependency openfl 9.3.2
+Downloading openfl-9,3,2.zip...
+Installing openfl...
+Done
+haxelib --never install hxdiscord_rpc --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Downloading hxdiscord_rpc-1,1,1.zip...
+Installing hxdiscord_rpc...
+  Current version is now 1.1.1
+Done
+Installing dependency hxcpp 4.3.2
+You already have hxcpp version 4.3.2 installed
+haxelib --never git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools.git main --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing extension-androidtools from https://github.com/MAJigsaw77/extension-androidtools.git branch: main
+Library extension-androidtools current version is now git
+Installing dependency hxcpp 4.3.2
+You already have hxcpp version 4.3.2 installed
+Installing dependency lime 8.1.1
+You already have lime version 8.1.1 installed
+haxelib --never git flxanimate https://github.com/FNF-CNE-Devs/flxanimate master --quiet
+
+A new version (4.1.0) of haxelib is available.
+Do `haxelib --global update haxelib` to get the latest version.
+
+Installing flxanimate from https://github.com/FNF-CNE-Devs/flxanimate branch: master
+Library flxanimate current version is now git
+haxelib --never list --quiet
+away3d: [5.0.9]
+extension-androidtools: [git]
+flixel-addons: [git]
+flixel: [git]
+flxanimate: [git]
+format: [3.7.0]
+hscript-improved: [git]
+hxcpp: 4.3.2 [git]
+hxdiscord_rpc: [1.1.1]
+hxvlc: [git]
+lime: 8.1.1 [git]
+markdown: [1.1.2]
+openfl: [9.2.2] 9.3.2
