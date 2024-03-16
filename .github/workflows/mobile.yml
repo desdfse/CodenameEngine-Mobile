@@ -26,7 +26,6 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
       - name: Compile
-        run: haxelib run lime build android -final
       - name: Upload Artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@main
