@@ -12,7 +12,7 @@ import openfl.utils.Assets as OpenFlAssets;
 import package mobile.backend;
 import openfl.Lib;
 import haxe.CallStack.StackItem;
-import haxe.CallStack;
+import haxe.CallStack.Expected identifier;
 import haxe.io.Path;
 import sys.FileSystem;
 import sys.io.File;
