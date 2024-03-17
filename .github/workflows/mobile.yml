@@ -108,4 +108,3 @@ jobs:
         with:
           name: androidBuild
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-          if-no-files-found: error
