@@ -9,6 +9,7 @@ import android.content.Context;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 import openfl.utils.Assets as OpenFlAssets;
+import package mobile.backend;
 import openfl.Lib;
 import haxe.CallStack.StackItem;
 import haxe.CallStack;
