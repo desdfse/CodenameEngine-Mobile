@@ -1,97 +1,150 @@
-package mobile.backend;
+package;
 
 #if android
-import android.content.Context;
-import android.widget.Toast;
-import android.os.Environment;
+import android.Tools;
 import android.Permissions;
+import android.PermissionsList;
+import android.content.Context;
+#end
 import lime.app.Application;
-#end
-import funkin.backend.utils.NativeAPI;
-import haxe.io.Path;
-import haxe.CallStack;
-import lime.system.System as LimeSystem;
-import openfl.utils.Assets as OpenflAssets;
-import lime.utils.Log as LimeLogger;
 import openfl.events.UncaughtErrorEvent;
+import openfl.utils.Assets as OpenFlAssets;
 import openfl.Lib;
-#if sys
-import sys.io.File;
+import haxe.CallStack.StackItem;
+import haxe.CallStack;
+import haxe.io.Path;
 import sys.FileSystem;
-#end
+import sys.io.File;
+import flash.system.System;
+
+/**
+ * ...
+ * @author: Saw (M.A. Jigsaw)
+ */
 
 using StringTools;
 
-/**
- * A class for mobile
- * @author Mihai Alexandru (M.A. Jigsaw)
- * @modification's author: Lily (mcagabe19)
- */
 class SUtil
 {
-	/**
-	 * This returns the external storage path that the game will use by the type.
-	 */
-	public static function getStorageDirectory():String
+	#if android
+	private static var aDir:String = null; // android dir
+	#end
+
+	public static function getPath():String
 	{
-		var daPath:String = '';
-
 		#if android
-		daPath = Context.getExternalFilesDir(null);
-		#elseif ios
-		daPath = LimeSystem.documentsDirectory;
+		if (aDir != null && aDir.length > 0)
+			return aDir;
+		else
+			return aDir = Tools.getExternalStorageDirectory() + '/' + '.' + Application.current.meta.get('file') + '/';
+		#else
+		return '';
 		#end
-
-		return daPath;
 	}
 
-	/**
-	 * This is mostly a fork of https://github.com/openfl/hxp/blob/master/src/hxp/System.hx#L595
-	 */
-	#if sys
-	public static function mkDirs(directory:String):Void
+	public static function doTheCheck()
 	{
-		var total:String = '';
-		if (directory.substr(0, 1) == '/')
-			total = '/';
-
-		var parts:Array<String> = directory.split('/');
-		if (parts.length > 0 && parts[0].indexOf(':') > -1)
-			parts.shift();
-
-		for (part in parts)
+		#if android
+		if (!Permissions.getGrantedPermissions().contains(PermissionsList.READ_EXTERNAL_STORAGE) || !Permissions.getGrantedPermissions().contains(PermissionsList.WRITE_EXTERNAL_STORAGE))
 		{
-			if (part != '.' && part != '')
+			Permissions.requestPermissions([PermissionsList.READ_EXTERNAL_STORAGE, PermissionsList.WRITE_EXTERNAL_STORAGE]);
+			SUtil.applicationAlert('Permissions', "if you acceptd the permissions all good if not expect a crash" + '\n' + 'Press Ok to see what happens');
+		}
+
+		if (Permissions.getGrantedPermissions().contains(PermissionsList.READ_EXTERNAL_STORAGE) || Permissions.getGrantedPermissions().contains(PermissionsList.WRITE_EXTERNAL_STORAGE))
+		{
+			if (!FileSystem.exists(Tools.getExternalStorageDirectory() + '/' + '.' + Application.current.meta.get('file')))
+				FileSystem.createDirectory(Tools.getExternalStorageDirectory() + '/' + '.' + Application.current.meta.get('file'));
+
+			if (!FileSystem.exists(SUtil.getPath() + 'assets') && !FileSystem.exists(SUtil.getPath() + 'mods'))
 			{
-				if (total != '' && total != '/')
-					total += '/';
+				SUtil.applicationAlert('Uncaught Error :(!', "Whoops, seems you didn't extract the files from the .APK!\nCopy 'assets' and 'mods' to .CodeNameEngine/\nPlease watch the tutorial by pressing OK.");
+				System.exit(0);
+			}
+			else
+			{
+				if (!FileSystem.exists(SUtil.getPath() + 'assets'))
+				{
+					SUtil.applicationAlert('Uncaught Error :(!', "Whoops, seems you didn't extract the assets/assets folder from the .APK!\nCopy 'assets' and 'mods' to .CodeNameEngine\nPlease watch the tutorial by pressing OK.");
+					System.exit(0);
+				}
 
-				total += part;
-
-				if (!FileSystem.exists(total))
-					FileSystem.createDirectory(total);
+				if (!FileSystem.exists(SUtil.getPath() + 'mods'))
+				{
+					SUtil.applicationAlert('Uncaught Error :(!', "Whoops, seems you didn't extract the assets/mods folder from the .APK!\nCopy 'assets' and 'mods' to .CodeNameEngine\nPlease watch the tutorial by pressing OK.");
+					System.exit(0);
+				}
 			}
 		}
+		#end
 	}
 
-	public static function saveContent(fileName:String = 'file', fileExtension:String = '.json', fileData:String = 'you forgot to add something in your code lol'):Void
+	public static function gameCrashCheck()
 	{
-		try
-		{
-			if (!FileSystem.exists('saves'))
-				FileSystem.createDirectory('saves');
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+	}
 
-			File.saveContent('saves/' + fileName + fileExtension, fileData);
-			NativeAPI.showMessageBox("Success!", fileName + " file has been saved", MSG_INFORMATION);
-		}
-		catch (e:Dynamic)
+	public static function onCrash(e:UncaughtErrorEvent):Void
+	{
+		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
+		var dateNow:String = Date.now().toString();
+		dateNow = StringTools.replace(dateNow, " ", "_");
+		dateNow = StringTools.replace(dateNow, ":", "'");
+
+		var path:String = "crash/" + "crash_" + dateNow + ".txt";
+		var errMsg:String = "";
+
+		for (stackItem in callStack)
 		{
-			#if (android && debug)
-			Toast.makeText("Error!\nClouldn't save the file because:\n" + e, Toast.LENGTH_LONG);
-			#else
-			LimeLogger.println("Error!\nClouldn't save the file because:\n" + e);
-			#end
+			switch (stackItem)
+			{
+				case FilePos(s, file, line, column):
+					errMsg += file + " (line " + line + ")\n";
+				default:
+					Sys.println(stackItem);
+			}
 		}
+
+		errMsg += e.error;
+
+		if (!FileSystem.exists(SUtil.getPath() + "crash"))
+		FileSystem.createDirectory(SUtil.getPath() + "crash");
+
+		File.saveContent(SUtil.getPath() + path, errMsg + "\n");
+
+		Sys.println(errMsg);
+		Sys.println("Crash dump saved in " + Path.normalize(path));
+		Sys.println("Making a simple alert ...");
+
+		SUtil.applicationAlert("Uncaught Error :(!", errMsg);
+		System.exit(0);
+	}
+
+	private static function applicationAlert(title:String, description:String)
+	{
+		Application.current.window.alert(description, title);
+	}
+
+	#if android
+	public static function saveContent(fileName:String = 'file', fileExtension:String = '.json', fileData:String = 'you forgot something to add in your code')
+	{
+		if (!FileSystem.exists(SUtil.getPath() + 'saves'))
+			FileSystem.createDirectory(SUtil.getPath() + 'saves');
+
+		File.saveContent(SUtil.getPath() + 'saves/' + fileName + fileExtension, fileData);
+		SUtil.applicationAlert('Done :)!', 'File Saved Successfully!');
+	}
+
+	public static function saveClipboard(fileData:String = 'you forgot something to add in your code')
+	{
+		openfl.system.System.setClipboard(fileData);
+		SUtil.applicationAlert('Done :)!', 'Data Saved to Clipboard Successfully!');
+	}
+
+	public static function copyContent(copyPath:String, savePath:String)
+	{
+		if (!FileSystem.exists(savePath))
+			File.saveBytes(savePath, OpenFlAssets.getBytes(copyPath));
 	}
 	#end
 }
