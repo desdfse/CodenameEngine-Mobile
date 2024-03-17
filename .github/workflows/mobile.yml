@@ -18,8 +18,19 @@ jobs:
       - name: Install Libraries
         run: |
           haxelib setup ~/haxelib
-          haxelib --quiet install hmm
-          haxelib run hmm install --quiet
+          haxelib git lime https://github.com/mcagabe19-stuff/lime
+          haxelib git hscript-improved https://www.github.com/FNF-CNE-Devs/hscript-improved
+          haxelib install openfl 9.2.2
+          haxelib install away3d
+          haxelib install format
+          haxelib install markdown
+          haxelib git flixel https://github.com/FNF-CNE-Devs/flixel
+          haxelib git flixel-addons https://github.com/FNF-CNE-Devs/flixel-addons
+          haxelib git hxcpp https://github.com/mcagabe19-stuff/hxcpp
+          haxelib install hxvlc
+          haxelib install hxdiscord_rpc
+          haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools.git
+          haxelib git flxanimate https://github.com/FNF-CNE-Devs/flxanimate
       - name: Configure Android
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
