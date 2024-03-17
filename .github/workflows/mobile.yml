@@ -92,6 +92,11 @@ jobs:
             	console.log(error.message);
             }
 
+            
+      - name: Compile
+        run: haxelib run lime build android -final
+
+        
       - name: Save Current Cache
         id: cache-release-build-android-save-gcc
         uses: actions/cache/save@main
