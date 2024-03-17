@@ -15,6 +15,11 @@ jobs:
         uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.2.5
+      - name: Install Libraries
+        run: |
+          haxelib setup ~/haxelib
+          haxelib --quiet install hmm
+          haxelib run hmm install --quiet
       - name: Configure Android
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
@@ -22,38 +27,11 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
       - name: Compile
+        run: haxelib run lime build android -final
       - name: Upload Artifact
         if: ${{ success() }}
         uses: actions/upload-artifact@main
         with:
           name: androidBuild
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-  iOS:
-    runs-on: macos-13
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Setup Haxe
-        uses: krdlab/setup-haxe@master
-        with:
-          haxe-version: 4.2.5
-      - name: Install Libraries
-        run: |
-          haxelib setup ~/haxelib
-          haxelib --quiet install hmm
-          haxelib run hmm install --quiet
-      - name: Compile
-        run: haxelib run lime build ios -final
-      - name: Make Ipa
-        run: |
-          cd export/release/ios/build/Release-iphoneos
-          mkdir Payload
-          mv *.app Payload
-          zip -r CodenameEngine.ipa Payload
-      - name: Upload Artifact
-        if: ${{ success() }}
-        uses: actions/upload-artifact@main
-        with:
-          name: iOSBuild
-          path: export/release/ios/build/Release-iphoneos/*.ipa
           if-no-files-found: error
