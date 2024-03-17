@@ -1,107 +1,223 @@
-import flixel.text.FlxTextBorderStyle;
+package funkin.menus;
 
-var resumeSpr:FlxSprite;
-var restartSpr:FlxSprite;
-var controlsSpr:FlxSprite;
-var optionsSpr:FlxSprite;
-var exitToMenu:FlxSprite;
+import funkin.editors.charter.Charter;
+import funkin.backend.scripting.events.MenuChangeEvent;
+import funkin.options.OptionsMenu;
+import funkin.backend.scripting.events.PauseCreationEvent;
+import funkin.backend.scripting.events.NameEvent;
+import funkin.backend.scripting.Script;
+import flixel.sound.FlxSound;
+import flixel.text.FlxText;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import funkin.options.keybinds.KeybindsOptions;
+import funkin.menus.StoryMenuState;
+import funkin.backend.utils.FunkinParentDisabler;
+import flixel.util.FlxTimer;
 
-function postCreate(){
-    for (i=>sprite in members)
-        sprite.visible = sprite.active = false;
+class PauseSubState extends MusicBeatSubstate
+{
+	public static var script:String = "";
 
-    var bg:FlxSprite = new FlxSprite().makeSolid(FlxG.width + 100, FlxG.height + 100, FlxColor.BLACK);
-    bg.updateHitbox();
-    bg.alpha = 0;
-    bg.screenCenter();
-    bg.scrollFactor.set();
-    add(bg);
+	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
-    for(i=>option  in [resumeSpr,restartSpr,controlsSpr,optionsSpr,exitToMenu]){
-        var yeye = new FlxSprite(0, 4 * i * 35).loadGraphic(Paths.image(switch(i){
-            case 0:
-                'game/pause/RESUME';
-            case 1:
-                'game/pause/RESTART';
-            case 2:
-                'game/pause/controls';
-            case 3:
-                'game/pause/OPTIONS';
-            case 4:
-                'game/pause/EXIT';
-        }));
-        yeye.scrollFactor.set();
-        yeye.ID = i;
-        add(yeye);
+	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Change Controls', 'Change Options', 'Exit to menu', "Exit to charter"];
+	var curSelected:Int = 0;
 
-        switch(i){
-            case 0:
-                resumeSpr = yeye;
-            case 1:
-                restartSpr = yeye;
-            case 2:
-                controlsSpr = yeye;
-            case 3:
-                optionsSpr = yeye;
-            case 4:
-                exitToMenu = yeye;
-        }
-    }
+	var pauseMusic:FlxSound;
 
-    FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
+	public var pauseScript:Script;
 
-    var garfield:FlxSprite = new FlxSprite(780, -720).loadGraphic(Paths.image('game/pause/GOREFIELD_PAUSE'));
-	//garfield.scale.set(0.3, 0.3);
-    //garfield.scrollFactor.set(0,0);
-	//garfield.updateHitbox();
-	garfield.antialiasing = true;
-	add(garfield);
+	public var game:PlayState = PlayState.instance; // shortcut
 
-    var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.SONG.meta.displayName, 32);
-	var deathCounter:FlxText = new FlxText(20, 15, 0, "Blue balled: " + PlayState.deathCounter, 32);
-	var multiplayerText:FlxText = new FlxText(20, 15, 0, PlayState.opponentMode ? 'OPPONENT MODE' : (PlayState.coopMode ? 'CO-OP MODE' : ''), 32);
+	private var __cancelDefault:Bool = false;
 
-    for(k=>label in [levelInfo, deathCounter, multiplayerText]) {
-        label.scrollFactor.set();
-        label.setFormat(Paths.font('Harbinger_Caps.otf'), 32, FlxColor.WHITE, "left", FlxTextBorderStyle.OUTLINE, FlxColor.fromRGB(30, 56, 29));
-        label.borderSize = 3;
-        label.updateHitbox();
-        label.alpha = 0;
-        label.x = FlxG.width - 10 - (label.width + 20);
-        label.y = 15 + (32 * k);
-        FlxTween.tween(label, {alpha: 1, y: label.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (k+1)});
-        add(label);
-    }
+	public function new(x:Float = 0, y:Float = 0) {
+		super();
+	}
 
-    FlxTween.tween(garfield, {y: -130}, 0.4, {ease: FlxEase.quartOut, onComplete: function(){
-        FlxTween.tween(garfield, {y: -127}, 2, {ease: FlxEase.quartInOut, type: 4});
-    }});
-}
+	var parentDisabler:FunkinParentDisabler;
+	var canOpen:Bool = true;
 
-function update(elapsed){
-    if (pauseMusic.volume < 0.5)
-        pauseMusic.volume += 0.1 * elapsed;
+	override function create()
+	{
+		super.create();
 
-    if(exitToMenu == null) return;
+		#if !mobile
+		if (menuItems.contains("Exit to charter") && !PlayState.chartingMode)
+			menuItems.remove("Exit to charter");
+		#end
 
-    resumeSpr.alpha = (curSelected == 0) ? 1 : 0.55;
-    restartSpr.alpha = (curSelected == 1) ? 1 : 0.55;
-    controlsSpr.alpha = (curSelected == 2) ? 1 : 0.55;
-    optionsSpr.alpha = (curSelected == 3) ? 1 : 0.55;
-    exitToMenu.alpha = (curSelected == 4) ? 1 : 0.55;
+		add(parentDisabler = new FunkinParentDisabler());
 
-    var upP = controls.UP_P;
-    var downP = controls.DOWN_P;
+		pauseScript = Script.create(Paths.script(script));
+		pauseScript.setParent(this);
+		pauseScript.load();
 
-    if (upP || downP)
-        FlxG.sound.play(Paths.sound("menu/scrollMenu"));
-        for(sprite in [resumeSpr,restartSpr,controlsSpr,optionsSpr,exitToMenu]){
-            FlxTween.cancelTweensOf(sprite);
-            if(sprite.alpha == 1){
-                FlxTween.tween(sprite, {x: 5}, 0.25, {ease: FlxEase.cubeOut});
-            }
-            else{
-                FlxTween.tween(sprite, {x: -50}, 0.25, {ease: FlxEase.cubeOut});
-            }
-        }
+		var event = EventManager.get(PauseCreationEvent).recycle('breakfast', menuItems);
+		pauseScript.call('create', [event]);
+
+		menuItems = event.options;
+
+
+		pauseMusic = FlxG.sound.load(Paths.music(event.music), 0, true);
+		pauseMusic.persist = false;
+		pauseMusic.group = FlxG.sound.defaultMusicGroup;
+		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
+
+		if (__cancelDefault = event.cancelled) return;
+
+		var bg:FlxSprite = new FlxSprite().makeSolid(FlxG.width + 100, FlxG.height + 100, FlxColor.BLACK);
+		bg.updateHitbox();
+		bg.alpha = 0;
+		bg.screenCenter();
+		bg.scrollFactor.set();
+		add(bg);
+
+		var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.SONG.meta.displayName, 32);
+		var levelDifficulty:FlxText = new FlxText(20, 15, 0, PlayState.difficulty.toUpperCase(), 32);
+		var deathCounter:FlxText = new FlxText(20, 15, 0, "Blue balled: " + PlayState.deathCounter, 32);
+		var multiplayerText:FlxText = new FlxText(20, 15, 0, PlayState.opponentMode ? 'OPPONENT MODE' : (PlayState.coopMode ? 'CO-OP MODE' : ''), 32);
+
+		for(k=>label in [levelInfo, levelDifficulty, deathCounter, multiplayerText]) {
+			label.scrollFactor.set();
+			label.setFormat(Paths.font('vcr.ttf'), 32);
+			label.updateHitbox();
+			label.alpha = 0;
+			label.x = FlxG.width - (label.width + 20);
+			label.y = 15 + (32 * k);
+			FlxTween.tween(label, {alpha: 1, y: label.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (k+1)});
+			add(label);
+		}
+
+		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
+
+		grpMenuShit = new FlxTypedGroup<Alphabet>();
+		add(grpMenuShit);
+
+		for (i in 0...menuItems.length)
+		{
+			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true, false);
+			songText.isMenuItem = true;
+			songText.targetY = i;
+			grpMenuShit.add(songText);
+		}
+
+		changeSelection();
+
+		camera = new FlxCamera();
+		camera.bgColor = 0;
+		FlxG.cameras.add(camera, false);
+
+		pauseScript.call("postCreate");
+
+		PlayState.instance.updateDiscordPresence();
+
+		addVirtualPad(UP_DOWN, A_B);
+		addVirtualPadCamera();
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		if (pauseMusic.volume < 0.5)
+			pauseMusic.volume += 0.01 * elapsed;
+
+		pauseScript.call("update", [elapsed]);
+
+		if (__cancelDefault) return;
+
+		var upP = controls.UP_P;
+		var downP = controls.DOWN_P;
+		var accepted = controls.ACCEPT;
+
+		if (upP)
+			changeSelection(-1);
+		if (downP)
+			changeSelection(1);
+		if (accepted)
+			selectOption();
+	}
+
+	public function selectOption() {
+		var event = EventManager.get(NameEvent).recycle(menuItems[curSelected]);
+		pauseScript.call("onSelectOption", [event]);
+
+		if (event.cancelled) return;
+
+		var daSelected:String = event.name;
+
+		switch (daSelected)
+		{
+			case "Resume":
+				close();
+			case "Restart Song":
+				parentDisabler.reset();
+				PlayState.instance.registerSmoothTransition();
+				FlxG.resetState();
+			case "Change Controls":
+				persistentDraw = false;
+				var daSubstate:Dynamic = new #if mobile mobile.substates.MobileControlSelectSubState(() -> {
+					FlxG.state.persistentUpdate = true;
+					camVPad.visible = true;
+					new FlxTimer().start(0.2, (tmr:FlxTimer) -> canOpen = true);
+				}, () -> {
+					FlxG.state.persistentUpdate = false;
+					camVPad.visible = false;
+					canOpen = false;
+				}) #else KeybindsOptions() #end;
+				if(canOpen)
+					openSubState(daSubstate);
+			// case "Chart Editor":
+			case "Change Options":
+				FlxG.switchState(new OptionsMenu());
+			case "Exit to charter":
+				FlxG.switchState(new funkin.editors.charter.Charter(PlayState.SONG.meta.name, PlayState.difficulty, false));
+			case "Exit to menu":
+				if (PlayState.chartingMode && Charter.undos.unsaved)
+					PlayState.instance.saveWarn(false);
+				else {
+					PlayState.resetSongInfos();
+					if (Charter.instance != null) Charter.instance.__clearStatics();
+					
+					CoolUtil.playMenuSong();
+					FlxG.switchState(PlayState.isStoryMode ? new StoryMenuState() : new FreeplayState());
+				}
+
+		}
+	}
+	override function destroy()
+	{
+		if(FlxG.cameras.list.contains(camera))
+			FlxG.cameras.remove(camera, true);
+		pauseScript.call("destroy");
+		pauseScript.destroy();
+
+		if (pauseMusic != null)
+			@:privateAccess {
+				FlxG.sound.destroySound(pauseMusic);
+			}
+
+		super.destroy();
+	}
+
+	function changeSelection(change:Int = 0):Void
+	{
+		var event = EventManager.get(MenuChangeEvent).recycle(curSelected, FlxMath.wrap(curSelected + change, 0, menuItems.length-1), change, change != 0);
+		pauseScript.call("onChangeItem", [event]);
+		if (event.cancelled) return;
+
+		curSelected = event.value;
+
+		for (i=>item in grpMenuShit.members)
+		{
+			item.targetY = i - curSelected;
+
+			if (item.targetY == 0)
+				item.alpha = 1;
+			else
+				item.alpha = 0.6;
+		}
+	}
 }
